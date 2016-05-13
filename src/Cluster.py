@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import NetworkIOStreams as nio
 import RTRL as network
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-
+import networkx as nx
+import scipy.cluster.hierarchy as sch
 # TODO: Investigate stochastic weight training instead of rudimentary gradient descent?
 
 class DataAggregator:
@@ -67,7 +67,7 @@ class StochasticSolutionGenerator:
                 da.collect()
                 .getSolution(),
                 self.dataaggregators)
-        self.numNets = len(networks)
+        self.numNets = len(aggregators)
 
 
     def distance(self, solA, solB):
@@ -86,16 +86,16 @@ class StochasticSolutionGenerator:
         Matrix norms: 
         http://www.personal.soton.ac.uk/jav/soton/HELM/workbooks/workbook_30/30_4_matrx_norms.pdf 
         """
-        delta = solB - solA
+        delta = np.abs(solB - solA)
         norm = np.sqrt(np.sum(delta**2))
-        return norm
+        return -norm
     
     def genCorrelationMatrix(self):
-       matrix = np.zeros((self.numNets, self.numNets))
-       for i in xrange(self.numNets):
-           for j in xrange(self.numNets):
-               matrix[i,j] = self.distance(self.solutions[i], self.solutions[j])
-       return matrix
+        matrix = np.zeros((self.numNets, self.numNets))
+        for i in xrange(self.numNets):
+            for j in xrange(self.numNets):
+                matrix[i,j] = self.distance(self.solutions[i], self.solutions[j])
+        return matrix
 
 
     def monte_carlo_aggregate_k_means(self):
@@ -113,70 +113,32 @@ class StochasticSolutionGenerator:
         raise NotImplementedError()
 
 
-    def plotSolutions(self):
-       
-        
-       dims = dk.dimensions(self.numNets)
-       f, axes = plt.subplots(*dims,figsize=(20,20))
-       for s in range(self.numNets):
-            sol = self.solutions[s]
-            x, y= dk.transform(dims, s)
-            print (x,y,s)
-            axis = axes[x][y]
-            pc = axis.pcolormesh(sol)
-
-            div = make_axes_locatable(axis)
-            cax = div.append_axes("right", size="5%", pad=0.01)
-            cbar = plt.colorbar(pc, cax=cax)
-                         
-       i = numNets
-       while i < dims[0]*dims[1]:
-            x,y = dk.transform(dims,i )
-            axes[x][y].axis('off')
-            i+=1
-       f.tight_layout()
+      
 
 
 
 
-
-def new_aggregator(p):
-
-    """
-    p is a 4-vector containing at its indices:
-    0 - number of nodes for the aggregator
-    2 - delay for the network input
-    3 - eta learning rate
-    4 - number of iterations to train the network for
-    """
-    NODES = 0
-    DELAY = 1
-    ETA = 2  
-    ITER = 3
-
-    nnodes = p[NODES]
-    delay = p[DELAY]
-    eta = p[ETA]
-    niterations = p[ITER]
-
-    network = net(nNodes=nnodes, io = nio.XorIOStream(delay = delay), eta = eta)
-
-    agg = DataAggregator(network, niterations)
-    return agg
 
 
 if __name__ == "__main__":
 
-    numNets = 10
+    numNets = 1000
     nNodes = 6
     net = network.RTRLNetwork;
    
     params = [(6, 2, 0.5,100)]*numNets
-
     networks = map(new_aggregator, params)
+    solutions = StochasticSolutionGenerator(networks)
+    correlations = solutions.genCorrelationMatrix()
 
-    aggregator = StochasticSolutionGenerator(networks)
-    aggregator.plotSolutions()
-    print aggregator.solutions
+    Z = sch.linkage(correlations, method='centroid')
+    indexs = sch.leaves_list(Z)
+
+    clustered_correl = correlations[indexs][:,indexs]
+    ax = plt.figure().add_subplot(111)
+    ax.pcolormesh(clustered_correl)
+
+    #graph = plt.figure(3)
+    #G = nx.from_numpy_matrix(clustered_correl)
+    #nx.draw_spring(G)
     plt.show()
-    
