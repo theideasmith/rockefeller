@@ -84,7 +84,6 @@ class RTRLNetwork(Network):
 
     # input to pp. Essentially replicating z, l times over all n
     ii = np.zeros((n, n * l));
-    ii[:] = z
     for i in range(n):
       ii[ i, (i * l):((i+1) * l) ] = z;
 
@@ -92,7 +91,7 @@ class RTRLNetwork(Network):
     ww = self.weights[:n, :n];
 
     # p is derivative of output_k with respect to weight i,j
-    # pp is multiplying discrete derivatives by weights 
+    # pp is multiplying discrete derivatives by weights
     # and adding input data
     pp = np.dot(ww, self.p) + ii;
 
