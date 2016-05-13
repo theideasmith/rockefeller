@@ -28,23 +28,25 @@ class Network:
       nInputs (int): number of input nodes
       outputNodes (array): indices of nodes representing outputs
     """
-
-    self.nNodes = nNodes;
-    self.io = io;
-
-    self.nInputs = io.nInputs;
-    #self.inputNodes = range(self.nInputs);
-
-    self.nOutputs = io.nOutputs;
-    #self.outputNodes = range(self.nInputs, self.nInputs + self.nOutputs);
-    self.outputNodes = range(0, self.nOutputs);
-
-    self.weights = 0.2 * (2 * np.random.rand(nNodes, nNodes + self.nInputs) - 1);
-    self.state = np.random.rand(nNodes);
-    self.input  = np.zeros(self.nInputs);
-    self.output = np.zeros(self.nOutputs);
-    self.goal   = np.zeros(self.nOutputs);
-
+    self.initialize(nNodes, io)
+    
+  def initialize(self, nNodes, io = NetworkIOStream()):
+    self.nNodes = nNodes;                                                         
+    self.io = io;                                                                 
+                                                                                  
+    self.nInputs = io.nInputs;                                                    
+    #self.inputNodes = range(self.nInputs);                                       
+                                                                                  
+    self.nOutputs = io.nOutputs;                                                  
+    #self.outputNodes = range(self.nInputs, self.nInputs + self.nOutputs);        
+    self.outputNodes = range(0, self.nOutputs);                                   
+                                                                                  
+    self.weights = 0.2 * (2 * np.random.rand(nNodes, nNodes + self.nInputs) - 1); 
+    self.state = np.random.rand(nNodes);                                          
+    self.input  = np.zeros(self.nInputs);                                         
+    self.output = np.zeros(self.nOutputs);                                        
+    self.goal   = np.zeros(self.nOutputs);                                        
+ 
 
   def step(self):
     """Evaluate time step"""

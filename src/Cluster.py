@@ -1,15 +1,9 @@
-import dimensions_kit as dk
 import numpy as np
-import matplotlib.pyplot as plt
 import NetworkIOStreams as nio
-import RTRL as network
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import networkx as nx
-import scipy.cluster.hierarchy as sch
 # TODO: Investigate stochastic weight training instead of rudimentary gradient descent?
 
-class DataAggregator:
-    def __init__(self, network, niterations):
+class RunNetwork:
+    def __init__(self, network):
         """
         Solution Analyser is initialized with a network
         object.
@@ -22,11 +16,14 @@ class DataAggregator:
 
         """
         self.t = 0
-        self.niterations = niterations if niterations else 1000000
         self.network = network
         # List, so that we can store
         # arbitrarily large histories
         self.nethist = [ ];
+        self.error = np.zeros(1000)
+        self.THRESHOLD = 5.0*10**(-5)  
+
+
 
     def iter(self):
         """
@@ -35,12 +32,27 @@ class DataAggregator:
         """
         state = self.network.currentState()
         self.nethist.append(state)
+        self.error[:-1] = self.error[1:];
+        self.error[-1] = self.network.error()
+   	print "Error :"
+	print self.error[-1]
+
+    def is_trained(self):
+    	training_status = np.mean(self.error[-10:-1])
+        print "Training: {0}, threshold: {1}".format(training_status,self.THRESHOLD)
+        if self.t > 500:                                     
+            if training_status <= self.THRESHOLD:
+                return True
+
+        return False
 
     def collect(self):
-        while self.t < self.niterations:
+        
+        while self.is_trained() == False:
             self.network.step()
             self.iter()
             self.t+=1
+            
         return self
 
     def getSolution(self):
@@ -112,33 +124,3 @@ class StochasticSolutionGenerator:
         """
         raise NotImplementedError()
 
-
-      
-
-
-
-
-
-
-if __name__ == "__main__":
-
-    numNets = 1000
-    nNodes = 6
-    net = network.RTRLNetwork;
-   
-    params = [(6, 2, 0.5,100)]*numNets
-    networks = map(new_aggregator, params)
-    solutions = StochasticSolutionGenerator(networks)
-    correlations = solutions.genCorrelationMatrix()
-
-    Z = sch.linkage(correlations, method='centroid')
-    indexs = sch.leaves_list(Z)
-
-    clustered_correl = correlations[indexs][:,indexs]
-    ax = plt.figure().add_subplot(111)
-    ax.pcolormesh(clustered_correl)
-
-    #graph = plt.figure(3)
-    #G = nx.from_numpy_matrix(clustered_correl)
-    #nx.draw_spring(G)
-    plt.show()

@@ -16,20 +16,8 @@ from pyqtgraph.Qt import QtGui, QtCore
 import matplotlib.pyplot as plt;
 
 import numpy as np
-
+from NetworkExamples import *
 reload(netview); reload(network);
-
-net = network.RTRLNetwork;
-
-rtrlnet = net(nNodes = 6, io = nio.XorIOStream(delay = 2), eta = 0.5);
-#rtrlnet = net(nNodes = 20, io = nio.PathIntegrationIOStream(nOrientations = 4, period = 20, switch = 1), eta = 0.1);
-
-#rtrlnet = net(nNodes = 6, io = nio.SequenceRecognitionIOStream(m = 2, delay = 30), eta = 0.1, reset = 100);
-#print rtrlnet.nOutputs
-##io = nio.RatchetIOStream(nOrientations = 4, jumpProbability = 0.05, outputDelay = 0);
-#rtrlnet = net(nNodes = 20, io = io, eta = 0.1, gamma = 0,  reset = None);
-#io.network = rtrlnet;
-
 
 
 pg.mkQApp()
@@ -38,7 +26,7 @@ reload(netview)
 
 t = QtCore.QTimer()
 
-win = netview.NetworkViewer(rtrlnet, timer = t);
+win = netview.NetworkViewer(xor_stream, timer = t);
 win.setWindowTitle("Real Time Recurrent Learning Simulator");
 win.show()
 win.resize(1100,700)

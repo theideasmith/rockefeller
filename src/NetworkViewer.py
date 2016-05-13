@@ -150,7 +150,6 @@ class NetworkViewer(QtGui.QWidget):
     # draw network
     self.nsteps = 100;    
     self.updateView();
-    
        
   def updateParameter(self, param, changes):
     for param, change, data in changes:
@@ -228,5 +227,6 @@ class NetworkViewer(QtGui.QWidget):
       #keep updating error as its cheap
       self.error[-1:] = self.network.error();
       self.curves[-1].setData(self.error);
-      
+      print "Error: "
+      print np.mean(np.diff(self.error))
     
