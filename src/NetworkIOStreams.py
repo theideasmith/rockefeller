@@ -27,7 +27,55 @@ class NetworkIOStream:
   def getOutput(self):
     return [];
 
-
+from scipy.signal import convolve2d
+class AutomatonIOStream(NetworkIOStream):
+    @staticmethod
+    def game_of_life_step(state):
+        X = state.astype(bool)
+        nbrs_count = convolve2d(X, np.ones((3, 3)), mode='same', boundary='wrap') - X
+        ret = (nbrs_count == 3) | (X & (nbrs_count == 2))
+        return ret.astype(int)
+    
+    @staticmethod
+    def init_random(w,h):
+        start = np.zeros(w*h)
+        start[:w*h*0.3]=1
+        np.random.shuffle(start)
+        then = start.reshape((w,h))
+        return then
+    
+    def reinitialize(self):
+        self.input = self.init_random(self.size,self.size)
+#         print self.input
+        self.output = self.stepper(self.input)
+        self.t=0
+    
+    def __init__(self, 
+                 size=10, 
+                 interval=10,
+                 stepper=game_of_life_step.__func__):
+        
+        self.size=size
+        self.stepper=stepper
+        self.nOutputs=size**2
+        self.nInputs=size**2
+        self.reinit_interval=interval
+        self.reinitialize()
+        print self.input
+        print self.output
+        
+    def getInput(self):
+        if self.t==(self.reinit_interval):
+            self.reinitialize()
+        else:
+            self.input=self.output
+            self.output=self.stepper(self.input)
+#         print "Input: "
+        self.t+=1
+        return self.input.reshape((self.nInputs,))
+        
+    def getOutput(self):
+        return self.output.reshape((self.nOutputs,))
 
 class DelayedIOStream(NetworkIOStream):
   """Generates input output data for delayed Xor"""

@@ -26,7 +26,7 @@ reload(netview)
 
 t = QtCore.QTimer()
 
-win = netview.NetworkViewer(xor_stream, timer = t);
+win = netview.NetworkViewer(automaton, timer = t);
 win.setWindowTitle("Real Time Recurrent Learning Simulator");
 win.show()
 win.resize(1100,700)

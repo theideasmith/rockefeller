@@ -35,7 +35,7 @@ class Network:
     self.io = io;                                                                 
                                                                                   
     self.nInputs = io.nInputs;                                                    
-    #self.inputNodes = range(self.nInputs);                                       
+    self.inputNodes = range(self.nInputs);                                       
                                                                                   
     self.nOutputs = io.nOutputs;                                                  
     #self.outputNodes = range(self.nInputs, self.nInputs + self.nOutputs);        
@@ -46,7 +46,7 @@ class Network:
     self.input  = np.zeros(self.nInputs);                                         
     self.output = np.zeros(self.nOutputs);                                        
     self.goal   = np.zeros(self.nOutputs);                                        
- 
+       
 
   def step(self):
     """Evaluate time step"""
@@ -61,7 +61,7 @@ class Network:
 
   def constrainWeights(self):
     """Constrain no-recurrent weights to output layers"""
-    self.weights[np.ix_(self.outputNodes, self.outputNodes)] = 0;
+    #self.weights[np.ix_(self.outputNodes, self.outputNodes)] = 0;
 
 
   def error(self):

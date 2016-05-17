@@ -228,5 +228,5 @@ class NetworkViewer(QtGui.QWidget):
       self.error[-1:] = self.network.error();
       self.curves[-1].setData(self.error);
       print "Error: "
-      print np.mean(np.diff(self.error))
+      print np.mean(self.error[-10:-1])
     
