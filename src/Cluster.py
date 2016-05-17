@@ -92,7 +92,7 @@ def ME(solA, solB):
     """                                                                                        
     delta = np.abs(solB - solA)                                                                
     norm = np.sqrt(np.sum(delta**2))                                                           
-    return -norm                                                                               
+    return (-1)*norm                                                                               
                                                                                                
 def genCorrelationMatrix(objects, distanceMetric=ME):                                          
     numNets = len(objects)
